@@ -79,7 +79,7 @@ export default function ProductDetailPage() {
     (product.category_name && product.category_name.toLowerCase() === 'tela')
   );
 
-  // Download product image
+  // Download product image (for single image fallback)
   const handleDownloadImage = async () => {
     try {
       const imageUrl = getImageUrl(product.image) || '/images/polo.png';
@@ -103,6 +103,40 @@ export default function ProductDetailPage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading image:', error);
+    }
+  };
+
+  // Download image from carousel
+  const handleDownloadCarouselImage = async (imageUrl) => {
+    try {
+      const url = typeof imageUrl === 'string' ? getImageUrl(imageUrl) : getImageUrl(imageUrl.url || imageUrl.image_url);
+      
+      // Fetch the image
+      const response = await fetch(url);
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const downloadUrl = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      const imageName = `${product.name.replace(/\s+/g, '_')}_image.${blob.type.split('/')[1] || 'png'}`;
+      link.download = imageName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading carousel image:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Download Failed',
+        text: 'Failed to download image. Please try again.',
+        confirmButtonColor: '#000C50',
+      });
     }
   };
 
@@ -514,6 +548,7 @@ export default function ProductDetailPage() {
                           )}
                           productName={product.name}
                           className="w-full h-full"
+                          onDownload={handleDownloadCarouselImage}
                         />
                       ) : (
                         <Image

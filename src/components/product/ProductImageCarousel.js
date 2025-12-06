@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
-export default function ProductImageCarousel({ images, productName, className = '' }) {
+export default function ProductImageCarousel({ images, productName, className = '', onDownload }) {
   // If images is a string (single image), convert to array
   const imageArray = Array.isArray(images) ? images : (images ? [images] : []);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -104,6 +104,43 @@ export default function ProductImageCarousel({ images, productName, className = 
     setTouchEnd(null);
   };
 
+  // Download current image
+  const handleDownload = async (e) => {
+    e.stopPropagation(); // Prevent carousel navigation
+    
+    if (onDownload) {
+      // Use custom download handler if provided
+      onDownload(imageArray[currentIndex]);
+      return;
+    }
+
+    // Default download behavior
+    try {
+      const imageUrl = imageArray[currentIndex];
+      
+      // Fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      const imageName = `${productName || 'product'}_image_${currentIndex + 1}.${blob.type.split('/')[1] || 'png'}`;
+      link.download = imageName.replace(/\s+/g, '_');
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  };
+
   // If no images, show placeholder
   if (imageArray.length === 0) {
     return (
@@ -176,6 +213,16 @@ export default function ProductImageCarousel({ images, productName, className = 
             </button>
           </>
         )}
+
+        {/* Download Button */}
+        <button
+          onClick={handleDownload}
+          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
+          aria-label="Download image"
+          title="Download this image"
+        >
+          <ArrowDownTrayIcon className="w-5 h-5" />
+        </button>
 
         {/* Image Counter */}
         {imageArray.length > 1 && (
