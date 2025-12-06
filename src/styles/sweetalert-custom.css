@@ -1,0 +1,205 @@
+/* Custom SweetAlert2 styles for smaller alerts */
+
+/* Smaller popup container */
+.swal2-popup-small {
+    width: 320px !important;
+    padding: 1rem !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+}
+
+/* Smaller title */
+.swal2-title-small {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.3 !important;
+}
+
+/* Smaller content */
+.swal2-content-small {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Smaller buttons */
+.swal2-confirm-small,
+.swal2-cancel-small {
+    font-size: 14px !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    min-width: 80px !important;
+    height: 36px !important;
+}
+
+/* FORCE visibility of all SweetAlert buttons */
+.swal2-styled,
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny,
+.swal2-actions button {
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+}
+
+/* Confirm button (dark blue #000C50) */
+.swal2-confirm,
+.swal2-confirm.swal2-styled,
+.swal2-confirm-small {
+    background-color: #000C50 !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Deny / Cancel button (gray #8E8E8E) */
+.swal2-deny,
+.swal2-cancel,
+.swal2-cancel.swal2-styled,
+.swal2-cancel-small {
+    background-color: #8E8E8E !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Remove SweetAlert hover fade effect */
+.swal2-styled:not([disabled]):hover {
+    opacity: 1 !important;
+    filter: brightness(1) !important;
+}
+
+/* Smaller actions container */
+.swal2-actions-small {
+    margin-top: 1rem !important;
+    gap: 0.5rem !important;
+}
+
+/* Icon size */
+.swal2-icon {
+    width: 60px !important;
+    height: 60px !important;
+    margin: 0.5rem auto 1rem !important;
+    border-width: 3px !important;
+    opacity: 1 !important;
+}
+
+/* Icon colors */
+.swal2-icon.swal2-success { border-color: #10B981 !important; }
+.swal2-icon.swal2-error { border-color: #EF4444 !important; }
+.swal2-icon.swal2-warning { border-color: #F59E0B !important; }
+.swal2-icon.swal2-info { border-color: #3B82F6 !important; }
+.swal2-icon.swal2-question { border-color: #6B7280 !important; }
+
+/* Success icon elements */
+.swal2-success-ring,
+.swal2-success-fix {
+    width: 60px !important;
+    height: 60px !important;
+}
+.swal2-success-line { height: 3px !important; }
+.swal2-success-line-long { width: 25px !important; }
+.swal2-success-line-tip { width: 8px !important; }
+
+/* Error icon elements */
+.swal2-x-mark,
+.swal2-error {
+    width: 60px !important;
+    height: 60px !important;
+}
+.swal2-x-mark-line-left,
+.swal2-x-mark-line-right {
+    height: 3px !important;
+}
+
+/* Warning dot */
+.swal2-warning-dot {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+/* Info dot */
+.swal2-info-dot {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+/* Question icon */
+.swal2-question-mark {
+    font-size: 24px !important;
+    font-weight: bold !important;
+}
+
+/* Reduce overall popup size */
+.swal2-popup {
+    width: 320px !important;
+    padding: 1rem !important;
+    font-size: 14px !important;
+}
+
+/* Smaller input fields */
+.swal2-input,
+.swal2-select,
+.swal2-textarea,
+.swal2-file {
+    font-size: 14px !important;
+    padding: 0.5rem !important;
+    height: 36px !important;
+    border-radius: 6px !important;
+}
+
+/* Smaller progress bar + timer */
+.swal2-progress-bar,
+.swal2-timer-progress-bar {
+    height: 4px !important;
+}
+
+/* Smaller close button */
+.swal2-close {
+    font-size: 20px !important;
+    width: 24px !important;
+    height: 24px !important;
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+}
+
+/* Smaller footer */
+.swal2-footer {
+    font-size: 12px !important;
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+}
+
+/* Smaller validation message */
+.swal2-validation-message {
+    font-size: 12px !important;
+    padding: 0.25rem 0.5rem !important;
+    margin-top: 0.5rem !important;
+    border-radius: 4px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .swal2-popup,
+    .swal2-popup-small {
+        width: 280px !important;
+        margin: 0 1rem !important;
+    }
+
+    .swal2-title-small {
+        font-size: 16px !important;
+    }
+
+    .swal2-content-small {
+        font-size: 13px !important;
+    }
+
+    .swal2-confirm-small,
+    .swal2-cancel-small {
+        font-size: 13px !important;
+        padding: 0.4rem 0.8rem !important;
+        min-width: 70px !important;
+        height: 32px !important;
+    }
+}

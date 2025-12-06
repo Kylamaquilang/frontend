@@ -1,0 +1,390 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  padding-top: 80px; /* Account for navbar height */
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  body {
+    padding-top: 60px; /* Reduced padding for mobile navbar */
+  }
+  
+  /* Ensure admin pages work well on mobile */
+  .admin-page {
+    margin-top: -60px !important;
+  }
+}
+
+/* Ensure Poppins is applied to text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, label, th, td {
+  font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Override body padding for admin pages */
+.admin-page {
+  margin-top: -80px !important;
+}
+
+/* Mobile-friendly table scrolling */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-friendly button sizing */
+@media (max-width: 640px) {
+  .btn-mobile {
+    min-height: 44px; /* iOS recommended touch target */
+    padding: 12px 16px;
+  }
+}
+
+/* Mobile-friendly form inputs */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Fix navbar overflow issues */
+nav[class*="fixed"] {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+/* Ensure notification dropdown is always visible */
+[class*="NotificationDropdown"],
+[class*="notification-dropdown"] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Prevent header from clipping dropdowns */
+header,
+nav {
+  overflow: visible !important;
+}
+
+/* ============================================
+   RESPONSIVE DROPDOWN/SELECT STYLES
+   Ensures all dropdowns are mobile-friendly
+   ============================================ */
+
+/* Base select element - 100% width on mobile */
+select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+/* Ensure select elements don't overflow containers */
+select,
+select[class*="w-full"],
+select[class*="w-"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Mobile-specific: Force 100% width on small screens */
+@media (max-width: 768px) {
+  select {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+  }
+  
+  /* Ensure select in modals respects modal width */
+  [role="dialog"] select,
+  .modal select,
+  [class*="modal"] select,
+  [class*="Modal"] select {
+    width: 100% !important;
+    max-width: calc(100vw - 2rem) !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure select in forms respects container */
+  form select,
+  .form select,
+  [class*="form"] select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Prevent option list overflow */
+/* Note: Native select option lists are controlled by the browser,
+   but we can ensure the select element itself doesn't cause overflow */
+select option {
+  max-width: 100vw;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  padding: 0.5rem;
+}
+
+/* Ensure select elements are properly sized in all contexts */
+select:not([multiple]) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* For custom dropdowns (if any are used) */
+.dropdown-menu,
+[class*="dropdown"],
+[class*="Dropdown"],
+[class*="menu"]:not(nav),
+[class*="Menu"]:not(nav) {
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
+}
+
+/* Custom dropdown menus - ensure they don't overflow */
+.absolute[class*="menu"],
+.absolute[class*="Menu"],
+.absolute[class*="dropdown"],
+.fixed[class*="menu"],
+.fixed[class*="Menu"],
+.fixed[class*="dropdown"] {
+  max-width: calc(100vw - 2rem) !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure dropdowns in modals are constrained */
+@media (max-width: 768px) {
+  /* Custom dropdown menus in modals */
+  [role="dialog"] .dropdown-menu,
+  [role="dialog"] [class*="menu"]:not(nav),
+  .modal .dropdown-menu,
+  .modal [class*="menu"]:not(nav),
+  [class*="modal"] .dropdown-menu,
+  [class*="modal"] [class*="menu"]:not(nav),
+  [class*="Modal"] .dropdown-menu,
+  [class*="Modal"] [class*="menu"]:not(nav) {
+    max-width: calc(100vw - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Absolute positioned dropdowns */
+  .absolute.right-0,
+  .absolute.left-0,
+  [class*="absolute"][class*="right"],
+  [class*="absolute"][class*="left"] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Ensure select elements align properly in modals */
+  [role="dialog"] select,
+  .modal select {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Action menus and similar custom dropdowns */
+  [class*="ActionMenu"],
+  [class*="action-menu"],
+  .action-menu {
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Ensure dropdown content doesn't overflow */
+  [class*="dropdown"] > *,
+  [class*="menu"]:not(nav) > * {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    word-wrap: break-word !important;
+  }
+}
+
+/* Fix for Tailwind's w-full class on select elements */
+select.w-full {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure select containers don't overflow */
+.select-container,
+[class*="select-container"],
+.select-wrapper,
+[class*="select-wrapper"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Prevent horizontal scrolling caused by selects */
+body,
+html {
+  overflow-x: hidden;
+}
+
+/* Ensure form containers respect viewport */
+form,
+.form,
+[class*="form"] {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Modal-specific fixes */
+@media (max-width: 768px) {
+  /* Ensure modals themselves don't overflow */
+  [role="dialog"],
+  .modal,
+  [class*="modal"],
+  [class*="Modal"] {
+    max-width: 100vw !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Override fixed widths in modals on mobile */
+  [role="dialog"] [class*="w-96"],
+  [role="dialog"] [class*="w-80"],
+  [role="dialog"] [class*="w-72"],
+  .modal [class*="w-96"],
+  .modal [class*="w-80"],
+  .modal [class*="w-72"],
+  [class*="modal"] [class*="w-96"],
+  [class*="modal"] [class*="w-80"],
+  [class*="modal"] [class*="w-72"] {
+    width: calc(100% - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+  }
+  
+  /* Ensure modal content doesn't overflow */
+  [role="dialog"] > *,
+  .modal > *,
+  [class*="modal"] > *,
+  [class*="Modal"] > * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure forms in modals are responsive */
+  [role="dialog"] form,
+  .modal form,
+  [class*="modal"] form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Ensure all inputs in modals are responsive */
+  [role="dialog"] input,
+  [role="dialog"] select,
+  [role="dialog"] textarea,
+  .modal input,
+  .modal select,
+  .modal textarea,
+  [class*="modal"] input,
+  [class*="modal"] select,
+  [class*="modal"] textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Additional fix for very small screens */
+@media (max-width: 480px) {
+  select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Ensure selects in tight spaces */
+  select[class*="sm:"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Custom dropdown menus on very small screens */
+  .absolute[class*="menu"]:not(nav),
+  .absolute[class*="Menu"]:not(nav),
+  .absolute[class*="dropdown"],
+  .fixed[class*="menu"]:not(nav),
+  .fixed[class*="Menu"]:not(nav),
+  .fixed[class*="dropdown"] {
+    max-width: calc(100vw - 1rem) !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+}
+
+/* Ensure dropdown menus match their input width */
+@media (max-width: 768px) {
+  /* Native select option lists - browser controlled but we ensure parent is sized correctly */
+  select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Custom dropdown menus should match their trigger width */
+  [class*="dropdown"]:not([class*="nav"]),
+  [class*="menu"]:not(nav):not([class*="nav"]) {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Dropdowns positioned absolutely should respect viewport */
+  .absolute[class*="dropdown"],
+  .absolute[class*="menu"]:not(nav) {
+    max-width: calc(100vw - 2rem) !important;
+    transform: translateX(0) !important;
+  }
+  
+  /* Right-aligned dropdowns */
+  .absolute.right-0[class*="dropdown"],
+  .absolute.right-0[class*="menu"]:not(nav) {
+    right: 1rem !important;
+    left: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Left-aligned dropdowns */
+  .absolute.left-0[class*="dropdown"],
+  .absolute.left-0[class*="menu"]:not(nav) {
+    left: 1rem !important;
+    right: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
