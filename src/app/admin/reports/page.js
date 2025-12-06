@@ -938,7 +938,7 @@ export default function AdminReportsPage() {
       // Add filter information
       let yPos = 100;
       const hasFilters = dateFilter.startDate || dateFilter.endDate || inventoryFilters.product_id || 
-                        inventoryFilters.category_id || inventoryFilters.size || inventoryFilters.status;
+                        inventoryFilters.category_id || inventoryFilters.size;
       if (hasFilters) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
@@ -1058,7 +1058,7 @@ export default function AdminReportsPage() {
 
       const printWindow = window.open('', '_blank');
       const hasFilters = dateFilter.startDate || dateFilter.endDate || inventoryFilters.product_id || 
-                        inventoryFilters.category_id || inventoryFilters.size || inventoryFilters.status;
+                        inventoryFilters.category_id || inventoryFilters.size;
       
       const printContent = `
         <!DOCTYPE html>
