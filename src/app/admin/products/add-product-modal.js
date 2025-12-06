@@ -523,90 +523,91 @@ export default function AddProductModal({ onClose, onSuccess }) {
 
                 {/* Multiple Images Upload Section */}
                 <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">Product Images</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Product Images</label>
                 
-                {/* Existing Images Preview */}
-                {previewUrls.length > 0 && (
-                  <div className="mb-4 space-y-2">
-                    <p className="text-xs text-gray-600 mb-2">Images to Upload ({previewUrls.length}):</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {previewUrls.map((previewUrl, idx) => (
-                        <div key={idx} className="relative">
-                          <img 
-                            src={previewUrl} 
-                            alt={`Preview ${idx + 1}`}
-                            className="w-full h-24 object-cover rounded-lg border-2 border-green-200"
-                          />
-                          {idx === 0 && (
-                            <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
-                              Primary
-                            </span>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newFiles = files.filter((_, i) => i !== idx);
-                              const newPreviews = previewUrls.filter((_, i) => i !== idx);
-                              setFiles(newFiles);
-                              setPreviewUrls(newPreviews);
-                            }}
-                            className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded hover:bg-red-700"
-                            disabled={loading}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+                  {/* Existing Images Preview */}
+                  {previewUrls.length > 0 && (
+                    <div className="mb-4 space-y-2">
+                      <p className="text-xs text-gray-600 mb-2">Images to Upload ({previewUrls.length}):</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {previewUrls.map((previewUrl, idx) => (
+                          <div key={idx} className="relative">
+                            <img 
+                              src={previewUrl} 
+                              alt={`Preview ${idx + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border-2 border-green-200"
+                            />
+                            {idx === 0 && (
+                              <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
+                                Primary
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newFiles = files.filter((_, i) => i !== idx);
+                                const newPreviews = previewUrls.filter((_, i) => i !== idx);
+                                setFiles(newFiles);
+                                setPreviewUrls(newPreviews);
+                              }}
+                              className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded hover:bg-red-700"
+                              disabled={loading}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* File Input Button */}
-                <div className="mb-4">
-                  <input
-                    id="product-images-input"
-                    type="file"
-                    accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
-                    className="hidden"
-                    multiple={true}
-                    onChange={(e) => {
-                      const newFiles = Array.from(e.target.files || []);
+                  {/* File Input Button */}
+                  <div className="mb-4">
+                    <input
+                      id="product-images-input"
+                      type="file"
+                      accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
+                      className="hidden"
+                      multiple={true}
+                      onChange={(e) => {
+                        const newFiles = Array.from(e.target.files || []);
+                        const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+                        setFiles(prev => [...prev, ...newFiles]);
+                        setPreviewUrls(prev => [...prev, ...newPreviews]);
+                        // Reset input
+                        e.target.value = '';
+                      }}
+                    />
+                  </div>
+
+                  {/* Drag & Drop Area */}
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer ${
+                      dragActive 
+                        ? 'border-[#000C50] bg-blue-50 border-solid' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                    onDragLeave={() => setDragActive(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragActive(false);
+                      const newFiles = Array.from(e.dataTransfer.files || []);
                       const newPreviews = newFiles.map(f => URL.createObjectURL(f));
                       setFiles(prev => [...prev, ...newFiles]);
                       setPreviewUrls(prev => [...prev, ...newPreviews]);
-                      // Reset input
-                      e.target.value = '';
                     }}
-                  />
-                </div>
-
-                {/* Drag & Drop Area */}
-                <div
-                  className={`border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer ${
-                    dragActive 
-                      ? 'border-[#000C50] bg-blue-50 border-solid' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                  onDragLeave={() => setDragActive(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragActive(false);
-                    const newFiles = Array.from(e.dataTransfer.files || []);
-                    const newPreviews = newFiles.map(f => URL.createObjectURL(f));
-                    setFiles(prev => [...prev, ...newFiles]);
-                    setPreviewUrls(prev => [...prev, ...newPreviews]);
-                  }}
-                  onClick={() => document.getElementById('product-images-input')?.click()}
-                >
-                  <div className="space-y-2">
-                    <svg className="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div>
-                      <p className="text-xs text-gray-900">Add images</p>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
-                      <p className="text-xs text-gray-500 mt-1">You can add multiple images</p>
+                    onClick={() => document.getElementById('product-images-input')?.click()}
+                  >
+                    <div className="space-y-2">
+                      <svg className="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div>
+                        <p className="text-xs text-gray-900">Add images</p>
+                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
+                        <p className="text-xs text-gray-500 mt-1">You can add multiple images</p>
+                      </div>
                     </div>
                   </div>
                 </div>
