@@ -371,15 +371,18 @@ export default function AdminReportsPage() {
   // Update sales pagination total when data changes
   useEffect(() => {
     if (salesData.orderItems && Array.isArray(salesData.orderItems)) {
+      const total = salesData.orderItems.length;
+      const pages = Math.ceil(total / salesPagination.limit);
       setSalesPagination(prev => ({
         ...prev,
-        total: salesData.orderItems.length,
-        page: prev.page > Math.ceil(salesData.orderItems.length / prev.limit) 
-          ? Math.max(1, Math.ceil(salesData.orderItems.length / prev.limit))
+        total: total,
+        pages: pages,
+        page: prev.page > pages 
+          ? Math.max(1, pages)
           : prev.page
       }));
     }
-  }, [salesData.orderItems]);
+  }, [salesData.orderItems, salesPagination.limit]);
 
   // Update revenue pagination total when data changes
   useEffect(() => {
