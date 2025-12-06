@@ -75,6 +75,26 @@ export default function AdminReportsPage() {
     size: '',
     category_id: ''
   });
+  
+  // Sales pagination
+  const [salesPagination, setSalesPagination] = useState({
+    page: 1,
+    limit: 25,
+    total: 0
+  });
+  
+  // Revenue pagination
+  const [revenuePagination, setRevenuePagination] = useState({
+    page: 1,
+    limit: 25,
+    total: 0
+  });
+  
+  // Revenue data state
+  const [revenueData, setRevenueData] = useState({
+    summary: null,
+    salesData: []
+  });
   const [availableProducts, setAvailableProducts] = useState([]); // All products from sales
   const [allProducts, setAllProducts] = useState([]); // Full product list with category info
   const [availableSizes, setAvailableSizes] = useState([]);
@@ -326,6 +346,173 @@ export default function AdminReportsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salesFilters.product_id, salesData.orderItems]);
+
+  // Calculate paginated sales data
+  const getPaginatedSalesData = () => {
+    if (!salesData.orderItems || !Array.isArray(salesData.orderItems)) {
+      return [];
+    }
+    
+    const startIndex = (salesPagination.page - 1) * salesPagination.limit;
+    const endIndex = startIndex + salesPagination.limit;
+    return salesData.orderItems.slice(startIndex, endIndex);
+  };
+
+  // Calculate paginated revenue data
+  const getPaginatedRevenueData = () => {
+    if (!revenueData.salesData || !Array.isArray(revenueData.salesData)) {
+      return [];
+    }
+    
+    const startIndex = (revenuePagination.page - 1) * revenuePagination.limit;
+    const endIndex = startIndex + revenuePagination.limit;
+    return revenueData.salesData.slice(startIndex, endIndex);
+  };
+
+  // Update sales pagination total when data changes
+  useEffect(() => {
+    if (salesData.orderItems && Array.isArray(salesData.orderItems)) {
+      setSalesPagination(prev => ({
+        ...prev,
+        total: salesData.orderItems.length,
+        page: prev.page > Math.ceil(salesData.orderItems.length / prev.limit) 
+          ? Math.max(1, Math.ceil(salesData.orderItems.length / prev.limit))
+          : prev.page
+      }));
+    }
+  }, [salesData.orderItems]);
+
+  // Update revenue pagination total when data changes
+  useEffect(() => {
+    if (revenueData.salesData && Array.isArray(revenueData.salesData)) {
+      setRevenuePagination(prev => ({
+        ...prev,
+        total: revenueData.salesData.length,
+        page: prev.page > Math.ceil(revenueData.salesData.length / prev.limit) 
+          ? Math.max(1, Math.ceil(revenueData.salesData.length / prev.limit))
+          : prev.page
+      }));
+    }
+  }, [revenueData.salesData]);
+
+  // Handle sales pagination
+  const handleSalesPageChange = (newPage) => {
+    setSalesPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const handleSalesLimitChange = (newLimit) => {
+    setSalesPagination(prev => ({ 
+      ...prev, 
+      limit: parseInt(newLimit), 
+      page: 1 
+    }));
+  };
+
+  // Handle revenue pagination
+  const handleRevenuePageChange = (newPage) => {
+    setRevenuePagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const handleRevenueLimitChange = (newLimit) => {
+    setRevenuePagination(prev => ({ 
+      ...prev, 
+      limit: parseInt(newLimit), 
+      page: 1 
+    }));
+  };
+
+  // Pagination component
+  const PaginationControls = ({ pagination, onPageChange, onLimitChange, dataName = 'items' }) => {
+    const totalPages = Math.ceil(pagination.total / pagination.limit);
+    const startItem = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
+    const endItem = Math.min(pagination.page * pagination.limit, pagination.total);
+
+    if (pagination.total === 0) return null;
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-700">
+            Showing {startItem} to {endItem} of {pagination.total} {dataName}
+          </span>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700">Rows per page:</label>
+            <select
+              value={pagination.limit}
+              onChange={(e) => onLimitChange(e.target.value)}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onPageChange(1)}
+            disabled={pagination.page === 1}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+          >
+            First
+          </button>
+          <button
+            onClick={() => onPageChange(pagination.page - 1)}
+            disabled={pagination.page === 1}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+          >
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (pagination.page <= 3) {
+                pageNum = i + 1;
+              } else if (pagination.page >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = pagination.page - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange(pageNum)}
+                  className={`px-3 py-1 text-sm border rounded-md transition-colors ${
+                    pagination.page === pageNum
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'border-gray-300 hover:bg-gray-100'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            onClick={() => onPageChange(pagination.page + 1)}
+            disabled={pagination.page >= totalPages}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+          >
+            Next
+          </button>
+          <button
+            onClick={() => onPageChange(totalPages)}
+            disabled={pagination.page >= totalPages}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+          >
+            Last
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // Fetch sales data (detailed order items)
   const fetchSalesData = useCallback(async () => {
@@ -2310,10 +2497,11 @@ export default function AdminReportsPage() {
                           </div>
                         )}
                         
-                        <div className="flex items-end">
+                        <div className="flex items-end gap-2">
                           <button
                             onClick={() => {
                               setSalesFilters({ product_id: '', size: '', category_id: '' });
+                              setSalesPagination(prev => ({ ...prev, page: 1 }));
                             }}
                             className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium transition-colors whitespace-nowrap h-[38px]"
                           >
@@ -2340,8 +2528,10 @@ export default function AdminReportsPage() {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                              {salesData.orderItems.map((item, index) => (
-                                <tr key={index} className={`hover:bg-green-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : ''}`} style={index % 2 !== 0 ? { backgroundColor: '#F6F6F6' } : {}}>
+                              {getPaginatedSalesData().map((item, index) => {
+                                const globalIndex = (salesPagination.page - 1) * salesPagination.limit + index;
+                                return (
+                                <tr key={globalIndex} className={`hover:bg-green-50/50 transition-colors ${globalIndex % 2 === 0 ? 'bg-white' : ''}`} style={globalIndex % 2 !== 0 ? { backgroundColor: '#F6F6F6' } : {}}>
                                   <td className="px-6 py-4">
                                     <div className="text-xs text-gray-900">
                                       {new Date(item.order_date).toLocaleDateString('en-US', { 
@@ -2407,17 +2597,26 @@ export default function AdminReportsPage() {
                                     )}
                                   </td>
                                 </tr>
-                              ))}
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
+
+                        {/* Pagination Controls */}
+                        <PaginationControls
+                          pagination={salesPagination}
+                          onPageChange={handleSalesPageChange}
+                          onLimitChange={handleSalesLimitChange}
+                          dataName="items"
+                        />
 
                         {/* Summary Footer */}
                         <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100">
                           <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600">
-                                Showing {salesData.orderItems.length} item{salesData.orderItems.length !== 1 ? 's' : ''} from {salesData.summary?.total_orders || 0} order{salesData.summary?.total_orders !== 1 ? 's' : ''}
+                                Showing {salesPagination.total} item{salesPagination.total !== 1 ? 's' : ''} from {salesData.summary?.total_orders || 0} order{salesData.summary?.total_orders !== 1 ? 's' : ''}
                               </span>
                               <div className="flex items-center gap-4">
                                 <span className="text-gray-600">Total Revenue:</span>
@@ -2569,8 +2768,10 @@ export default function AdminReportsPage() {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {revenueData.salesData.map((item, index) => (
-                              <tr key={index}>
+                            {getPaginatedRevenueData().map((item, index) => {
+                              const globalIndex = (revenuePagination.page - 1) * revenuePagination.limit + index;
+                              return (
+                              <tr key={globalIndex}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                   {formatDate(item.date)}
                                 </td>
@@ -2590,9 +2791,18 @@ export default function AdminReportsPage() {
                                   {item.profit_margin_percent}%
                                 </td>
                               </tr>
-                            ))}
+                              );
+                            })}
                           </tbody>
                         </table>
+                        
+                        {/* Pagination Controls */}
+                        <PaginationControls
+                          pagination={revenuePagination}
+                          onPageChange={handleRevenuePageChange}
+                          onLimitChange={handleRevenueLimitChange}
+                          dataName="records"
+                        />
                       </div>
                     )}
                   </div>
