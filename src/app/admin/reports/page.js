@@ -57,7 +57,7 @@ export default function AdminReportsPage() {
   });
   const [inventoryPagination, setInventoryPagination] = useState({
     page: 1,
-    limit: 50,
+    limit: 10,
     total: 0,
     pages: 1
   });
@@ -78,7 +78,7 @@ export default function AdminReportsPage() {
   // Sales pagination
   const [salesPagination, setSalesPagination] = useState({
     page: 1,
-    limit: 25,
+    limit: 10,
     total: 0,
     pages: 1
   });
