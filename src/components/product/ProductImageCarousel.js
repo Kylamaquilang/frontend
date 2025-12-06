@@ -104,6 +104,13 @@ export default function ProductImageCarousel({ images, productName, className = 
     setTouchEnd(null);
   };
 
+  // Check if product is in tela or uniform category
+  const isTelaOrUniform = category && (
+    category.toLowerCase() === 'tela' || 
+    category.toLowerCase() === 'uniform' ||
+    category.toLowerCase() === 'uniforms'
+  );
+
   // Download current image
   const handleDownload = async (e) => {
     e.stopPropagation(); // Prevent carousel navigation
