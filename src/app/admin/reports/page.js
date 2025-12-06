@@ -64,8 +64,7 @@ export default function AdminReportsPage() {
   const [inventoryFilters, setInventoryFilters] = useState({
     product_id: '',
     category_id: '',
-    size: '',
-    status: ''
+    size: ''
   });
   const [salesData, setSalesData] = useState({});
   
@@ -125,7 +124,6 @@ export default function AdminReportsPage() {
       if (inventoryFilters.product_id) params.append('product_id', inventoryFilters.product_id);
       if (inventoryFilters.category_id) params.append('category_id', inventoryFilters.category_id);
       if (inventoryFilters.size) params.append('size', inventoryFilters.size);
-      if (inventoryFilters.status) params.append('status', inventoryFilters.status);
       params.append('page', inventoryPagination.page);
       params.append('limit', inventoryPagination.limit);
       
@@ -676,7 +674,7 @@ export default function AdminReportsPage() {
         break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, dateFilter.startDate, dateFilter.endDate, inventoryFilters.product_id, inventoryFilters.category_id, inventoryFilters.size, inventoryFilters.status, inventoryPagination.page, inventoryPagination.limit, salesFilters.product_id, salesFilters.size, salesFilters.category_id]);
+  }, [activeTab, dateFilter.startDate, dateFilter.endDate, inventoryFilters.product_id, inventoryFilters.category_id, inventoryFilters.size, inventoryPagination.page, inventoryPagination.limit, salesFilters.product_id, salesFilters.size, salesFilters.category_id]);
 
   // Set up real-time socket listeners
   useEffect(() => {
@@ -871,11 +869,6 @@ export default function AdminReportsPage() {
         csvRows.push(`Product,"${product?.name || inventoryFilters.product_id}"`);
       }
       if (inventoryFilters.size) csvRows.push(`Size,"${inventoryFilters.size}"`);
-      if (inventoryFilters.status) {
-        const statusLabel = inventoryFilters.status === 'IN_STOCK' ? 'In Stock' : 
-                           inventoryFilters.status === 'LOW_STOCK' ? 'Low Stock' : 'Out of Stock';
-        csvRows.push(`Status,"${statusLabel}"`);
-      }
       
       const csvContent = csvRows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -972,12 +965,6 @@ export default function AdminReportsPage() {
         }
         if (inventoryFilters.size) {
           pdf.text(`Size: ${inventoryFilters.size}`, 20, yPos);
-          yPos += 8;
-        }
-        if (inventoryFilters.status) {
-          const statusLabel = inventoryFilters.status === 'IN_STOCK' ? 'In Stock' : 
-                             inventoryFilters.status === 'LOW_STOCK' ? 'Low Stock' : 'Out of Stock';
-          pdf.text(`Status: ${statusLabel}`, 20, yPos);
           yPos += 8;
         }
       }
@@ -1213,7 +1200,6 @@ export default function AdminReportsPage() {
                 ${inventoryFilters.category_id ? `<p>Category: ${inventoryCategories.find(c => c.id === parseInt(inventoryFilters.category_id))?.name || inventoryFilters.category_id}</p>` : ''}
                 ${inventoryFilters.product_id ? `<p>Product: ${inventoryProducts.find(p => p.id === parseInt(inventoryFilters.product_id))?.name || inventoryFilters.product_id}</p>` : ''}
                 ${inventoryFilters.size ? `<p>Size: ${inventoryFilters.size}</p>` : ''}
-                ${inventoryFilters.status ? `<p>Status: ${inventoryFilters.status === 'IN_STOCK' ? 'In Stock' : inventoryFilters.status === 'LOW_STOCK' ? 'Low Stock' : 'Out of Stock'}</p>` : ''}
               </div>
             ` : ''}
             
@@ -2213,66 +2199,98 @@ export default function AdminReportsPage() {
                       </div>
                       
                       {/* Inventory Filters */}
-                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        <div className="w-full min-w-0">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Category</label>
-                          <select
-                            value={inventoryFilters.category_id}
-                            onChange={(e) => handleInventoryFilterChange('category_id', e.target.value)}
-                            className="w-full min-w-0 px-3 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation bg-white"
-                            style={{ minHeight: '44px' }}
-                          >
-                            <option value="">All Categories</option>
-                            {inventoryCategories.map((cat) => (
-                              <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="w-full min-w-0">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Product</label>
-                          <select
-                            value={inventoryFilters.product_id}
-                            onChange={(e) => handleInventoryFilterChange('product_id', e.target.value)}
-                            className="w-full min-w-0 px-3 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            disabled={!inventoryFilters.category_id}
-                            style={{ minHeight: '44px' }}
-                          >
-                            <option value="">All Products</option>
-                            {inventoryProducts
-                              .filter(p => !inventoryFilters.category_id || p.category_id === parseInt(inventoryFilters.category_id))
-                              .map((product) => (
-                                <option key={product.id} value={product.id}>{product.name}</option>
+                      <div className="mt-4 px-6 py-4 border-b border-gray-100 bg-gray-50">
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3">
+                          <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[250px]">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Filter by Category</label>
+                            <select
+                              value={inventoryFilters.category_id}
+                              onChange={(e) => {
+                                const newCategoryId = e.target.value;
+                                // Only clear product_id if the selected product doesn't belong to the new category
+                                const selectedProduct = inventoryProducts.find(p => p.id === parseInt(inventoryFilters.product_id));
+                                const shouldClearProduct = newCategoryId && selectedProduct && selectedProduct.category_id !== parseInt(newCategoryId);
+                                
+                                setInventoryFilters(prev => ({
+                                  ...prev,
+                                  category_id: newCategoryId,
+                                  product_id: shouldClearProduct ? '' : prev.product_id,
+                                  size: shouldClearProduct ? '' : prev.size
+                                }));
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">All Categories</option>
+                              {inventoryCategories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                  {category.name}
+                                </option>
                               ))}
-                          </select>
-                        </div>
-                        <div className="w-full min-w-0">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Size</label>
-                          <select
-                            value={inventoryFilters.size}
-                            onChange={(e) => handleInventoryFilterChange('size', e.target.value)}
-                            className="w-full min-w-0 px-3 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            disabled={!inventoryFilters.product_id}
-                            style={{ minHeight: '44px' }}
-                          >
-                            <option value="">All Sizes</option>
-                            {inventorySizes.map((size) => (
-                              <option key={size} value={size}>{size}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="w-full min-w-0">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Status</label>
-                          <select
-                            value={inventoryFilters.status}
-                            onChange={(e) => handleInventoryFilterChange('status', e.target.value)}
-                            className="w-full min-w-0 px-3 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation bg-white"
-                            style={{ minHeight: '44px' }}
-                          >
-                            <option value="">All Status</option>
-                            <option value="IN_STOCK">In Stock</option>
-                            <option value="LOW_STOCK">Low Stock</option>
-                            <option value="OUT_OF_STOCK">Out of Stock</option>
-                          </select>
+                            </select>
+                          </div>
+                          
+                          <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[250px]">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Filter by Product Name</label>
+                            <select
+                              value={inventoryFilters.product_id}
+                              onChange={(e) => setInventoryFilters({ ...inventoryFilters, product_id: e.target.value, size: '' })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">All Products</option>
+                              {inventoryProducts
+                                .filter(p => !inventoryFilters.category_id || p.category_id === parseInt(inventoryFilters.category_id))
+                                .map((product) => (
+                                  <option key={product.id} value={product.id}>
+                                    {product.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                          
+                          {inventoryFilters.product_id && (
+                            <div className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[180px]">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Filter by Size
+                                {inventorySizes.length === 0 && (
+                                  <span className="text-gray-400 text-xs ml-1">(No sizes available)</span>
+                                )}
+                              </label>
+                              {inventorySizes.length > 0 ? (
+                                <select
+                                  value={inventoryFilters.size}
+                                  onChange={(e) => setInventoryFilters({ ...inventoryFilters, size: e.target.value })}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                  <option value="">All Sizes</option>
+                                  {inventorySizes.map((size) => (
+                                    <option key={size} value={size}>
+                                      {size}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <select
+                                  value=""
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  disabled
+                                >
+                                  <option value="">No sizes available</option>
+                                </select>
+                              )}
+                            </div>
+                          )}
+                          
+                          <div className="flex items-end gap-2">
+                            <button
+                              onClick={() => {
+                                setInventoryFilters({ product_id: '', size: '', category_id: '' });
+                                setInventoryPagination(prev => ({ ...prev, page: 1 }));
+                              }}
+                              className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium transition-colors whitespace-nowrap h-[38px]"
+                            >
+                              Clear Filters
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
