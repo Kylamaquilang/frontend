@@ -159,9 +159,9 @@ export default function ProductDetailPage() {
       return product?.stock || 0;
     }
     
-    // If only NONE size or no sizes, use product stock
+    // If only NONE size, use the NONE size's stock (current stock), not base_stock
     if (product.sizes.length === 1 && product.sizes[0].size === 'NONE') {
-      return product.stock || 0;
+      return product.sizes[0].stock || 0;
     }
     
     // If no size selected, return 0
@@ -647,7 +647,7 @@ export default function ProductDetailPage() {
                   <div className="text-xs text-gray-500">
                     {selectedSize ? 
                       `${getMaxQuantityForSelectedSize()} available in ${selectedSize} size` : 
-                      `${product.stock} available in stock`
+                      `${getMaxQuantityForSelectedSize()} available in stock`
                     }
                   </div>
                 </div>
