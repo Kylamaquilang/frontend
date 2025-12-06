@@ -141,6 +141,69 @@ export default function ProductImageCarousel({ images, productName, className = 
     }
   };
 
+  // Print current image
+  const handlePrint = (e) => {
+    e.stopPropagation(); // Prevent carousel navigation
+    
+    if (onPrint) {
+      // Use custom print handler if provided
+      onPrint(imageArray[currentIndex]);
+      return;
+    }
+
+    // Default print behavior
+    try {
+      const imageUrl = imageArray[currentIndex];
+      
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        console.error('Failed to open print window. Please allow popups.');
+        return;
+      }
+      
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${productName || 'Product'} - Print</title>
+            <style>
+              @media print {
+                @page {
+                  margin: 0;
+                }
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+              }
+              body {
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background: white;
+              }
+              img {
+                max-width: 100%;
+                max-height: 100vh;
+                object-fit: contain;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${imageUrl}" alt="${productName || 'Product'}" onload="window.print(); window.onafterprint = function() { window.close(); }" />
+          </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+    } catch (error) {
+      console.error('Error printing image:', error);
+    }
+  };
+
   // If no images, show placeholder
   if (imageArray.length === 0) {
     return (
@@ -165,15 +228,25 @@ export default function ProductImageCarousel({ images, productName, className = 
             e.target.src = '/images/polo.png';
           }}
         />
-        {/* Download Button for single image */}
-        <button
-          onClick={handleDownload}
-          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
-          aria-label="Download image"
-          title="Download this image"
-        >
-          <ArrowDownTrayIcon className="w-5 h-5" />
-        </button>
+        {/* Download and Print Buttons for single image */}
+        <div className="absolute top-2 right-2 flex gap-2 z-10">
+          <button
+            onClick={handleDownload}
+            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+            aria-label="Download image"
+            title="Download this image"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={handlePrint}
+            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+            aria-label="Print image"
+            title="Print this image"
+          >
+            <PrinterIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -223,15 +296,25 @@ export default function ProductImageCarousel({ images, productName, className = 
           </>
         )}
 
-        {/* Download Button */}
-        <button
-          onClick={handleDownload}
-          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
-          aria-label="Download image"
-          title="Download this image"
-        >
-          <ArrowDownTrayIcon className="w-5 h-5" />
-        </button>
+        {/* Download and Print Buttons */}
+        <div className="absolute top-2 right-2 flex gap-2 z-10">
+          <button
+            onClick={handleDownload}
+            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+            aria-label="Download image"
+            title="Download this image"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={handlePrint}
+            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+            aria-label="Print image"
+            title="Print this image"
+          >
+            <PrinterIcon className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Image Counter */}
         {imageArray.length > 1 && (
