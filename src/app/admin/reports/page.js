@@ -600,7 +600,30 @@ export default function AdminReportsPage() {
     }
   }, [dateFilter.startDate, dateFilter.endDate, salesFilters.product_id, salesFilters.size, salesFilters.category_id, dataLoaded.sales]);
 
-
+  // Fetch revenue data
+  const fetchRevenueData = useCallback(async () => {
+    try {
+      setError('');
+      
+      const params = new URLSearchParams();
+      if (dateFilter.startDate) params.append('start_date', dateFilter.startDate);
+      if (dateFilter.endDate) params.append('end_date', dateFilter.endDate);
+      params.append('group_by', 'day');
+      
+      const response = await API.get(`/orders/sales-analytics?${params}`);
+      
+      setRevenueData({
+        summary: response.data.summary || null,
+        salesData: response.data.salesData || []
+      });
+    } catch (err) {
+      console.error('Revenue data error:', err);
+      setRevenueData({
+        summary: null,
+        salesData: []
+      });
+    }
+  }, [dateFilter.startDate, dateFilter.endDate]);
 
   // Auto-refresh for reports
   useAdminAutoRefresh(() => {
@@ -610,6 +633,9 @@ export default function AdminReportsPage() {
         break;
       case 'sales':
         fetchSalesData();
+        break;
+      case 'revenue':
+        fetchRevenueData();
         break;
       default:
         break;
@@ -642,6 +668,9 @@ export default function AdminReportsPage() {
         fetchAllCategories();
         fetchSoldProducts();
         fetchSalesData();
+        break;
+      case 'revenue':
+        fetchRevenueData();
         break;
       default:
         break;
