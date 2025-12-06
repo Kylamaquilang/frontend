@@ -564,26 +564,6 @@ export default function ProductDetailPage() {
                         />
                       )}
                     </div>
-                    
-                    {/* Download and Print buttons for 'tela' category */}
-                    {isTelaCategory && (
-                      <div className="mt-4 flex gap-3 justify-center">
-                        <button
-                          onClick={handleDownloadImage}
-                          className="p-2 bg-[#000C50] text-white rounded-lg hover:bg-gray-800 transition-colors"
-                          title="Download Image"
-                        >
-                          <ArrowDownTrayIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={handlePrintImage}
-                          className="p-2 bg-white text-[#000C50] border-2 border-[#000C50] rounded-lg hover:bg-gray-50 transition-colors"
-                          title="Print Image"
-                        >
-                          <PrinterIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
 
