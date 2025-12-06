@@ -73,38 +73,6 @@ export default function ProductDetailPage() {
   // Auto-refresh for product details
   useUserAutoRefresh(fetchProduct, 'products');
 
-  // Check if product category is 'tela' (case-insensitive)
-  const isTelaCategory = product && (
-    (product.category && product.category.toLowerCase() === 'tela') ||
-    (product.category_name && product.category_name.toLowerCase() === 'tela')
-  );
-
-  // Download product image (for single image fallback)
-  const handleDownloadImage = async () => {
-    try {
-      const imageUrl = getImageUrl(product.image) || '/images/polo.png';
-      
-      // Fetch the image
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      
-      // Create a temporary URL for the blob
-      const url = window.URL.createObjectURL(blob);
-      
-      // Create a temporary anchor element and trigger download
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${product.name.replace(/\s+/g, '_')}_image.${blob.type.split('/')[1] || 'png'}`;
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading image:', error);
-    }
-  };
 
   // Download image from carousel
   const handleDownloadCarouselImage = async (imageUrl) => {
