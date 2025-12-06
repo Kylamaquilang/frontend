@@ -3,7 +3,7 @@ const nextConfig = {
   // Basic production optimizations
   compress: true,
   poweredByHeader: false,
-  
+
   images: {
     remotePatterns: [
       {
@@ -37,12 +37,17 @@ const nextConfig = {
       },
     ],
   },
+
+  // Keep your webpack customizations
   webpack: (config) => {
     config.resolve.extensionAlias = {
       '.js': ['.js', '.jsx'],
     };
     return config;
   },
+
+  // Add empty Turbopack config to avoid errors
+  turbopack: {},
 };
 
 export default nextConfig;
