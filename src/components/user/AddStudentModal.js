@@ -38,7 +38,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
   // Function to verify if student was added despite timeout
   const verifyStudentAdded = async (studentId) => {
     try {
-      const response = await API.get('/students');
+      const response = await API.get('/students/all');
       const students = response.data?.students || [];
       const found = students.find(s => s.student_id === studentId?.trim());
       return found;
