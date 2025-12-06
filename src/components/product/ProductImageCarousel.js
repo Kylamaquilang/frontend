@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ArrowDownTrayIcon, PrinterIcon } from '@heroicons/react/24/outline';
 
-export default function ProductImageCarousel({ images, productName, className = '', onDownload, onPrint }) {
+export default function ProductImageCarousel({ images, productName, className = '', onDownload, onPrint, category }) {
   // If images is a string (single image), convert to array
   const imageArray = Array.isArray(images) ? images : (images ? [images] : []);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -228,25 +228,27 @@ export default function ProductImageCarousel({ images, productName, className = 
             e.target.src = '/images/polo.png';
           }}
         />
-        {/* Download and Print Buttons for single image */}
-        <div className="absolute top-2 right-2 flex gap-2 z-10">
-          <button
-            onClick={handleDownload}
-            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
-            aria-label="Download image"
-            title="Download this image"
-          >
-            <ArrowDownTrayIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handlePrint}
-            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
-            aria-label="Print image"
-            title="Print this image"
-          >
-            <PrinterIcon className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Download and Print Buttons for single image - Only for tela/uniform category */}
+        {isTelaOrUniform && (
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
+            <button
+              onClick={handleDownload}
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+              aria-label="Download image"
+              title="Download this image"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+              aria-label="Print image"
+              title="Print this image"
+            >
+              <PrinterIcon className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -296,25 +298,27 @@ export default function ProductImageCarousel({ images, productName, className = 
           </>
         )}
 
-        {/* Download and Print Buttons */}
-        <div className="absolute top-2 right-2 flex gap-2 z-10">
-          <button
-            onClick={handleDownload}
-            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
-            aria-label="Download image"
-            title="Download this image"
-          >
-            <ArrowDownTrayIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handlePrint}
-            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
-            aria-label="Print image"
-            title="Print this image"
-          >
-            <PrinterIcon className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Download and Print Buttons - Only for tela/uniform category */}
+        {isTelaOrUniform && (
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
+            <button
+              onClick={handleDownload}
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+              aria-label="Download image"
+              title="Download this image"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+              aria-label="Print image"
+              title="Print this image"
+            >
+              <PrinterIcon className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         {/* Image Counter */}
         {imageArray.length > 1 && (

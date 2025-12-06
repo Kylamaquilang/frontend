@@ -517,6 +517,7 @@ export default function ProductDetailPage() {
                           productName={product.name}
                           className="w-full h-full"
                           onDownload={handleDownloadCarouselImage}
+                          category={product.category || product.category_name || ''}
                         />
                       ) : (
                         <Image
