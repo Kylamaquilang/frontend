@@ -79,7 +79,8 @@ export default function AdminReportsPage() {
   const [salesPagination, setSalesPagination] = useState({
     page: 1,
     limit: 25,
-    total: 0
+    total: 0,
+    pages: 1
   });
   
   // Revenue pagination
@@ -2385,57 +2386,13 @@ export default function AdminReportsPage() {
                     </div>
 
                     {/* Pagination */}
-                    {inventoryPagination.pages > 1 && (
-                      <div className="px-4 sm:px-6 py-4 bg-gray-50/50 border-t border-gray-100">
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Rows per page:</span>
-                              <select
-                                value={inventoryPagination.limit}
-                                onChange={(e) => handleInventoryLimitChange(e.target.value)}
-                                className="flex-1 sm:flex-none text-sm sm:text-base border border-gray-200 rounded-lg px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation bg-white"
-                                style={{ minHeight: '44px', minWidth: '80px' }}
-                              >
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="200">200</option>
-                          </select>
-                        </div>
-                            <span className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
-                              Showing {((inventoryPagination.page - 1) * inventoryPagination.limit) + 1} to {Math.min(inventoryPagination.page * inventoryPagination.limit, inventoryPagination.total)} of {inventoryPagination.total}
-                          </span>
-                          </div>
-                          <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-3">
-                            <button
-                              onClick={() => handleInventoryPageChange(inventoryPagination.page - 1)}
-                              disabled={inventoryPagination.page === 1}
-                              className="p-2.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                              style={{ minHeight: '44px', minWidth: '44px' }}
-                              aria-label="Previous page"
-                            >
-                              <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                  </button>
-                            <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap px-2">
-                              Page {inventoryPagination.page} of {inventoryPagination.pages}
-                            </span>
-                            <button
-                              onClick={() => handleInventoryPageChange(inventoryPagination.page + 1)}
-                              disabled={inventoryPagination.page >= inventoryPagination.pages}
-                              className="p-2.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                              style={{ minHeight: '44px', minWidth: '44px' }}
-                              aria-label="Next page"
-                            >
-                              <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                    {inventoryPagination.total > 0 && (
+                      <PaginationControls
+                        pagination={inventoryPagination}
+                        onPageChange={handleInventoryPageChange}
+                        onLimitChange={handleInventoryLimitChange}
+                        dataName="items"
+                      />
                     )}
                   </div>
                 )}
