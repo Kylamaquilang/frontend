@@ -21,15 +21,6 @@ export function SocketProvider({ children }) {
       // Use environment variable for socket URL, fallback to localhost for development
       // IMPORTANT: Socket.io doesn't use /api path, so strip it if present
       let socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      
-      // Warn if NEXT_PUBLIC_API_URL is not set in production
-      if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) {
-        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-        if (isProduction) {
-          console.error('⚠️ NEXT_PUBLIC_API_URL is not set for Socket.io! Please set this environment variable in Railway.');
-        }
-      }
-      
       socketUrl = socketUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
       const socketInstance = io(socketUrl, {
         auth: {
@@ -56,6 +47,13 @@ export function SocketProvider({ children }) {
 
       socketInstance.on('connect_error', (error) => {
         console.error('🔌 Socket.io connection error:', error.message);
+        console.error('🔌 Socket.io error details:', {
+          message: error.message,
+          type: error.type,
+          description: error.description,
+          context: error.context,
+          socketUrl: socketUrl
+        });
         setIsConnected(false);
       });
     }
@@ -77,15 +75,6 @@ export function SocketProvider({ children }) {
     // Use environment variable for socket URL, fallback to localhost for development
     // IMPORTANT: Socket.io doesn't use /api path, so strip it if present
     let socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    
-    // Warn if NEXT_PUBLIC_API_URL is not set in production
-    if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) {
-      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-      if (isProduction) {
-        console.error('⚠️ NEXT_PUBLIC_API_URL is not set for Socket.io! Please set this environment variable in Railway.');
-      }
-    }
-    
     socketUrl = socketUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
     const socketInstance = io(socketUrl, {
       auth: {
