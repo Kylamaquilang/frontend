@@ -152,7 +152,7 @@ export default function ProductImageCarousel({ images, productName, className = 
     );
   }
 
-  // If only one image, no need for carousel
+  // If only one image, no need for carousel but still show download button
   if (imageArray.length === 1) {
     return (
       <div className={`relative rounded-lg overflow-hidden ${className}`}>
@@ -165,6 +165,15 @@ export default function ProductImageCarousel({ images, productName, className = 
             e.target.src = '/images/polo.png';
           }}
         />
+        {/* Download Button for single image */}
+        <button
+          onClick={handleDownload}
+          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
+          aria-label="Download image"
+          title="Download this image"
+        >
+          <ArrowDownTrayIcon className="w-5 h-5" />
+        </button>
       </div>
     );
   }
