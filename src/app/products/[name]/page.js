@@ -11,6 +11,7 @@ import Swal from '@/lib/sweetalert-config';
 import { getImageUrl } from '@/utils/imageUtils';
 import { useUserAutoRefresh } from '@/hooks/useAutoRefresh';
 import { ArrowDownTrayIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import ProductImageCarousel from '@/components/product/ProductImageCarousel';
 
 export default function ProductDetailPage() {
   const { name } = useParams();
@@ -33,11 +34,23 @@ export default function ProductDetailPage() {
       );
       
       if (foundProduct) {
-        // Use the grouped product data which includes all sizes
-        setProduct(foundProduct);
+        // Fetch full product details including images
+        try {
+          const { data: fullProduct } = await API.get(`/products/${foundProduct.id}`);
+          // Merge full product data (with images) with found product data
+          setProduct({
+            ...foundProduct,
+            images: fullProduct.images || (foundProduct.image ? [{ url: foundProduct.image, is_primary: true }] : [])
+          });
+        } catch (detailError) {
+          // If detail fetch fails, use the basic product data
+          console.log('Could not fetch product details, using basic data:', detailError.message);
+          setProduct(foundProduct);
+        }
         
         // Auto-select "NONE" size if it's the only option
-        if (foundProduct.sizes && foundProduct.sizes.length === 1 && foundProduct.sizes[0].size === 'NONE') {
+        const productToUse = foundProduct;
+        if (productToUse.sizes && productToUse.sizes.length === 1 && productToUse.sizes[0].size === 'NONE') {
           setSelectedSize('NONE');
         }
       } else {
@@ -494,17 +507,27 @@ export default function ProductDetailPage() {
                 <div className="bg-white-100 p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center">
                   <div className="w-full max-w-sm">
                     <div className="aspect-square bg-white rounded-xl overflow-hidden">
-                      <Image
-                        src={getImageUrl(product.image) || '/images/polo.png'}
-                        alt={product.name}
-                        width={400}
-                        height={400}
-                        className="object-contain w-full h-full p-4"
-                        onError={(e) => {
-                          console.log('Image failed to load, using fallback');
-                          e.target.src = '/images/polo.png';
-                        }}
-                      />
+                      {product.images && product.images.length > 0 ? (
+                        <ProductImageCarousel
+                          images={product.images.map(img => 
+                            typeof img === 'string' ? getImageUrl(img) : getImageUrl(img.url || img.image_url)
+                          )}
+                          productName={product.name}
+                          className="w-full h-full"
+                        />
+                      ) : (
+                        <Image
+                          src={getImageUrl(product.image) || '/images/polo.png'}
+                          alt={product.name}
+                          width={400}
+                          height={400}
+                          className="object-contain w-full h-full p-4"
+                          onError={(e) => {
+                            console.log('Image failed to load, using fallback');
+                            e.target.src = '/images/polo.png';
+                          }}
+                        />
+                      )}
                     </div>
                     
                     {/* Download and Print buttons for 'tela' category */}

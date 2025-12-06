@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -9,6 +9,8 @@ export default function ProductImageCarousel({ images, productName, className = 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const carouselRef = useRef(null);
 
   // Minimum swipe distance (in pixels)
   const minSwipeDistance = 50;
@@ -34,9 +36,11 @@ export default function ProductImageCarousel({ images, productName, className = 
     setCurrentIndex(index);
   };
 
+  // Touch handlers for mobile swipe
   const onTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setIsDragging(true);
   };
 
   const onTouchMove = (e) => {
@@ -44,7 +48,10 @@ export default function ProductImageCarousel({ images, productName, className = 
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) {
+      setIsDragging(false);
+      return;
+    }
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -56,6 +63,45 @@ export default function ProductImageCarousel({ images, productName, className = 
     if (isRightSwipe) {
       goToPrevious();
     }
+    setIsDragging(false);
+  };
+
+  // Mouse handlers for desktop drag/swipe
+  const onMouseDown = (e) => {
+    setIsDragging(true);
+    setTouchStart(e.clientX);
+    setTouchEnd(null);
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return;
+    setTouchEnd(e.clientX);
+  };
+
+  const onMouseUp = () => {
+    if (!isDragging) return;
+    
+    if (touchStart !== null && touchEnd !== null) {
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+
+      if (isLeftSwipe) {
+        goToNext();
+      }
+      if (isRightSwipe) {
+        goToPrevious();
+      }
+    }
+    setIsDragging(false);
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const onMouseLeave = () => {
+    setIsDragging(false);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   // If no images, show placeholder
@@ -88,10 +134,16 @@ export default function ProductImageCarousel({ images, productName, className = 
 
   return (
     <div 
-      className={`relative rounded-lg overflow-hidden ${className}`}
+      ref={carouselRef}
+      className={`relative rounded-lg overflow-hidden ${className} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseLeave}
+      style={{ userSelect: 'none' }}
     >
       {/* Main Image */}
       <div className="relative w-full h-full">
