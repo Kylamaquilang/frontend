@@ -86,8 +86,9 @@ export default function AdminReportsPage() {
   // Revenue pagination
   const [revenuePagination, setRevenuePagination] = useState({
     page: 1,
-    limit: 25,
-    total: 0
+    limit: 10,
+    total: 0,
+    pages: 1
   });
   
   // Revenue data state
@@ -141,7 +142,7 @@ export default function AdminReportsPage() {
         };
         const pagination = response.data.pagination || {
           page: 1,
-          limit: 50,
+          limit: 10,
           total: 0,
           pages: 1
         };
