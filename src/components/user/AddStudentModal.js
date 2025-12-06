@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import API from '@/lib/axios';
+import API, { getErrorMessage } from '@/lib/axios';
 import Swal from '@/lib/sweetalert-config';
 
 export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
