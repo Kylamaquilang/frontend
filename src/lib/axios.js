@@ -20,7 +20,7 @@ API_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const API = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
-  timeout: 30000, // 30 seconds timeout
+  timeout: 60000, // 60 seconds timeout (increased for operations that might take longer)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -62,14 +62,28 @@ API.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle network errors
-    if (error.code === 'ECONNABORTED' || error.message === 'Network Error' || !error.response) {
+    // Handle network errors and timeouts
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout') || error.message === 'Network Error' || !error.response) {
+      const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
       console.error('Network Error:', error.message || 'Unable to connect to server');
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        isTimeout,
+        config: error.config ? {
+          url: error.config.url,
+          method: error.config.method,
+          timeout: error.config.timeout
+        } : null
+      });
       // Don't throw for network errors - let components handle them gracefully
       return Promise.reject({
         ...error,
         isNetworkError: true,
-        message: 'Unable to connect to server. Please check if the server is running.',
+        isTimeout,
+        message: isTimeout 
+          ? 'Request timed out. The operation may have completed on the server. Please check if the student was added.'
+          : 'Unable to connect to server. Please check if the server is running and CORS is configured correctly.',
       });
     }
     

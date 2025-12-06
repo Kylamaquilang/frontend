@@ -79,8 +79,64 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
         onClose();
       }, 1500);
     } catch (err) {
+      // Handle timeout errors first
+      if (err?.isTimeout || err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
+        const errorMessage = err?.message || 'Request timed out. The operation may have completed on the server.';
+        await Swal.fire({
+          title: 'Request Timeout',
+          html: `<div style="text-align: left;">
+            <p>${errorMessage}</p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+              <strong>Possible causes:</strong><br/>
+              • The server may be slow to respond<br/>
+              • Network connection issues<br/>
+              • CORS configuration problems<br/>
+              • The student may have already been added
+            </p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+              <strong>What to do:</strong><br/>
+              • Check if the student was already added in the student list<br/>
+              • Try again after a few moments<br/>
+              • Contact support if the problem persists
+            </p>
+          </div>`,
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#000C50'
+        });
+        setError(errorMessage);
+        // Trigger refresh to check if student was actually added
+        onSuccess?.();
+      }
+      // Handle network errors (CORS, connection refused, etc.)
+      else if (err?.isNetworkError || !err?.response) {
+        const errorMessage = err?.message || 'Unable to connect to server. Please check if the server is running and CORS is configured correctly.';
+        await Swal.fire({
+          title: 'Connection Error',
+          html: `<div style="text-align: left;">
+            <p>${errorMessage}</p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+              <strong>Possible causes:</strong><br/>
+              • Backend server is not running<br/>
+              • CORS is not configured correctly<br/>
+              • Network connectivity issues<br/>
+              • Firewall blocking the request
+            </p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+              <strong>What to do:</strong><br/>
+              • Verify the backend server is running<br/>
+              • Check CORS configuration in Railway<br/>
+              • Ensure FRONTEND_URL is set correctly
+            </p>
+          </div>`,
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#000C50'
+        });
+        setError(errorMessage);
+      }
       // Handle specific error cases gracefully
-      if (err?.response?.status === 409) {
+      else if (err?.response?.status === 409) {
         // Duplicate email or student ID - expected error, show user-friendly message
         const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Email or Student ID already exists';
         const existingStudent = err?.response?.data?.existingStudent;
@@ -111,7 +167,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
         setError(errorMessage);
       } else {
         // Unexpected error - show user-friendly message
-        const errorMessage = err?.response?.data?.error || 'Failed to add student. Please try again.';
+        const errorMessage = err?.response?.data?.error || err?.message || 'Failed to add student. Please try again.';
         await Swal.fire({
           title: 'Error',
           text: errorMessage,
