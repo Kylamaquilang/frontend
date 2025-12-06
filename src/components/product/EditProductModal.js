@@ -24,6 +24,9 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
   const [previewUrl, setPreviewUrl] = useState('');
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [isActive, setIsActive] = useState(true);
+  const [productImages, setProductImages] = useState([]); // Array of {id, url, is_primary}
+  const [newImages, setNewImages] = useState([]); // Array of File objects for new images
+  const [imagesToDelete, setImagesToDelete] = useState([]); // Array of image IDs to delete
 
   const loadProduct = useCallback(async () => {
     try {
@@ -47,6 +50,16 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
       setDescription(data.description || '');
       setPreviewUrl(imageUrl);
       setIsActive(data.is_active !== undefined ? (data.is_active === 1 || data.is_active === true) : true);
+      
+      // Load product images (if available)
+      if (data.images && Array.isArray(data.images)) {
+        setProductImages(data.images);
+      } else if (data.image) {
+        // Fallback: use single image field as primary image
+        setProductImages([{ id: 'primary', url: imageUrl, is_primary: true }]);
+      } else {
+        setProductImages([]);
+      }
       
       // Handle sizes
       if (data.sizes && data.sizes.length > 0) {
@@ -112,16 +125,26 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
 
       // Size stock validation removed - stock is auto-managed by inventory
 
-      let finalImageUrl = product?.image || null;
-      
-      // Upload image if provided
-      if (file) {
+      // Upload new images
+      const uploadedImageUrls = [];
+      for (const newImageFile of newImages) {
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', newImageFile);
         const uploadRes = await API.post('/products/upload-image', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        finalImageUrl = uploadRes.data.url;
+        uploadedImageUrls.push(uploadRes.data.url);
+      }
+
+      // Determine primary image (first existing primary, or first new image, or existing image field)
+      let finalImageUrl = product?.image || null;
+      const primaryImage = productImages.find(img => img.is_primary);
+      if (primaryImage && !imagesToDelete.includes(primaryImage.id)) {
+        finalImageUrl = primaryImage.url;
+      } else if (uploadedImageUrls.length > 0) {
+        finalImageUrl = uploadedImageUrls[0];
+      } else if (productImages.length > 0 && !imagesToDelete.includes(productImages[0].id)) {
+        finalImageUrl = productImages[0].url;
       }
 
       // Prepare sizes data
@@ -138,9 +161,18 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
         original_price: Number(costPrice), // Use the actual cost price
         // stock field removed - auto-managed by inventory
         category_id: categoryId ? Number(categoryId) : null,
-        image: finalImageUrl,
+        image: finalImageUrl, // Keep for backward compatibility
         sizes: sizesData.length > 0 ? sizesData : undefined,
-        is_active: isActive
+        is_active: isActive,
+        // Multiple images support
+        images: {
+          add: uploadedImageUrls,
+          remove: imagesToDelete,
+          existing: productImages.filter(img => !imagesToDelete.includes(img.id)).map(img => ({
+            id: img.id,
+            is_primary: img.is_primary
+          }))
+        }
       };
 
       await API.put(`/products/${productId}`, productData);
@@ -358,22 +390,104 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
                         )}
                       </div>
 
-                      {/* Image Upload Section */}
+                      {/* Multiple Images Section */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">Product Image</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">Product Images</label>
                         
-                        {/* File Input Button */}
+                        {/* Existing Images */}
+                        {productImages.filter(img => !imagesToDelete.includes(img.id)).length > 0 && (
+                          <div className="mb-4 space-y-2">
+                            <p className="text-xs text-gray-600 mb-2">Current Images:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {productImages
+                                .filter(img => !imagesToDelete.includes(img.id))
+                                .map((img, idx) => (
+                                  <div key={img.id || idx} className="relative group">
+                                    <img 
+                                      src={img.url} 
+                                      alt={`Product image ${idx + 1}`}
+                                      className="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
+                                    />
+                                    {img.is_primary && (
+                                      <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
+                                        Primary
+                                      </span>
+                                    )}
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          // Set as primary
+                                          setProductImages(prev => prev.map(i => ({
+                                            ...i,
+                                            is_primary: i.id === img.id
+                                          })));
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
+                                        disabled={saving}
+                                      >
+                                        Set Primary
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (img.id !== 'primary') {
+                                            setImagesToDelete(prev => [...prev, img.id]);
+                                          }
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
+                                        disabled={saving}
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* New Images Preview */}
+                        {newImages.length > 0 && (
+                          <div className="mb-4 space-y-2">
+                            <p className="text-xs text-gray-600 mb-2">New Images to Add:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {newImages.map((imgFile, idx) => (
+                                <div key={idx} className="relative">
+                                  <img 
+                                    src={URL.createObjectURL(imgFile)} 
+                                    alt={`New image ${idx + 1}`}
+                                    className="w-full h-24 object-cover rounded-lg border-2 border-green-200"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setNewImages(prev => prev.filter((_, i) => i !== idx));
+                                    }}
+                                    className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded hover:bg-red-700"
+                                    disabled={saving}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Add Image Button */}
                         <div className="mb-4">
                           <input
-                            id="product-file-input"
+                            id="product-images-input"
                             type="file"
                             accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
                             className="hidden"
-                            multiple={false}
+                            multiple={true}
                             onChange={(e) => {
-                              const f = e.target.files?.[0] || null;
-                              setFile(f);
-                              setPreviewUrl(f ? URL.createObjectURL(f) : (product?.image ? getImageUrl(product.image) : ''));
+                              const files = Array.from(e.target.files || []);
+                              setNewImages(prev => [...prev, ...files]);
+                              // Reset input
+                              e.target.value = '';
                             }}
                           />
                         </div>
@@ -390,59 +504,22 @@ export default function EditProductModal({ isOpen, onClose, productId, onSuccess
                           onDrop={(e) => {
                             e.preventDefault();
                             setDragActive(false);
-                            const f = e.dataTransfer.files?.[0];
-                            if (f) {
-                              setFile(f);
-                              setPreviewUrl(URL.createObjectURL(f));
-                            }
+                            const files = Array.from(e.dataTransfer.files || []);
+                            setNewImages(prev => [...prev, ...files]);
                           }}
-                          onClick={() => document.getElementById('product-file-input')?.click()}
+                          onClick={() => document.getElementById('product-images-input')?.click()}
                         >
-                          {previewUrl ? (
-                            <div className="space-y-2">
-                              <img 
-                                src={previewUrl} 
-                                alt="Preview" 
-                                className="w-24 h-24 object-cover rounded-lg mx-auto border-2 border-gray-200"
-                                onError={(e) => {
-                                  console.error('Failed to load preview image:', previewUrl);
-                                  e.target.src = '/images/polo.png';
-                                }}
-                                onLoad={() => {
-                                  console.log('Preview image loaded successfully:', previewUrl);
-                                }}
-                              />
-                              <div>
-                                <p className="text-xs font-medium text-gray-900">{file?.name || 'Current image'}</p>
-                                <p className="text-xs text-gray-500">Click to change image</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <svg className="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                              <div>
-                                <p className="text-xs text-gray-900">Upload an image</p>
-                                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* File Info */}
-                        {file && (
-                          <div className="mt-3 p-2 bg-gray-50 rounded-lg">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-600">File size:</span>
-                              <span className="font-medium">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs mt-1">
-                              <span className="text-gray-600">File type:</span>
-                              <span className="font-medium">{file.type}</span>
+                          <div className="space-y-2">
+                            <svg className="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <div>
+                              <p className="text-xs text-gray-900">Add images</p>
+                              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
+                              <p className="text-xs text-gray-500 mt-1">You can add multiple images</p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
