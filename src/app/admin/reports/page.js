@@ -606,9 +606,9 @@ export default function AdminReportsPage() {
       setError('');
       
       const params = new URLSearchParams();
-      if (dateFilter.startDate) params.append('start_date', dateFilter.startDate);
-      if (dateFilter.endDate) params.append('end_date', dateFilter.endDate);
-      params.append('group_by', 'day');
+      if (dateFilter.startDate) params.append('startDate', dateFilter.startDate);
+      if (dateFilter.endDate) params.append('endDate', dateFilter.endDate);
+      params.append('groupBy', 'day');
       
       const response = await API.get(`/orders/sales-analytics?${params}`);
       
