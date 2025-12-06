@@ -1,0 +1,187 @@
+'use client';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+
+export default function ProductImageCarousel({ images, productName, className = '' }) {
+  // If images is a string (single image), convert to array
+  const imageArray = Array.isArray(images) ? images : (images ? [images] : []);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Minimum swipe distance (in pixels)
+  const minSwipeDistance = 50;
+
+  useEffect(() => {
+    // Reset to first image when images change
+    setCurrentIndex(0);
+  }, [images]);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? imageArray.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === imageArray.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+  };
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNext();
+    }
+    if (isRightSwipe) {
+      goToPrevious();
+    }
+  };
+
+  // If no images, show placeholder
+  if (imageArray.length === 0) {
+    return (
+      <div className={`relative bg-gray-100 rounded-lg overflow-hidden ${className}`}>
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="text-gray-400 text-sm">No image</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If only one image, no need for carousel
+  if (imageArray.length === 1) {
+    return (
+      <div className={`relative rounded-lg overflow-hidden ${className}`}>
+        <Image
+          src={imageArray[0]}
+          alt={productName || 'Product'}
+          fill
+          className="object-contain p-3"
+          onError={(e) => {
+            e.target.src = '/images/polo.png';
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className={`relative rounded-lg overflow-hidden ${className}`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Main Image */}
+      <div className="relative w-full h-full">
+        <Image
+          src={imageArray[currentIndex]}
+          alt={`${productName || 'Product'} - Image ${currentIndex + 1}`}
+          fill
+          className="object-contain p-3"
+          onError={(e) => {
+            e.target.src = '/images/polo.png';
+          }}
+        />
+
+        {/* Navigation Arrows */}
+        {imageArray.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-10"
+              aria-label="Next image"
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          </>
+        )}
+
+        {/* Image Counter */}
+        {imageArray.length > 1 && (
+          <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
+            {currentIndex + 1} / {imageArray.length}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail Dots */}
+      {imageArray.length > 1 && imageArray.length <= 5 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {imageArray.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex 
+                  ? 'bg-white w-6' 
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnail Strip (for more than 5 images) */}
+      {imageArray.length > 5 && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black/30 p-2 overflow-x-auto z-10">
+          <div className="flex gap-2 justify-center">
+            {imageArray.map((img, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`flex-shrink-0 w-12 h-12 rounded overflow-hidden border-2 transition-all ${
+                  index === currentIndex 
+                    ? 'border-white scale-110' 
+                    : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+                aria-label={`Go to image ${index + 1}`}
+              >
+                <Image
+                  src={img}
+                  alt={`Thumbnail ${index + 1}`}
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    e.target.src = '/images/polo.png';
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

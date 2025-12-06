@@ -8,6 +8,7 @@ import API from '@/lib/axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProductImageUrl } from '@/utils/imageUtils';
+import ProductImageCarousel from '@/components/product/ProductImageCarousel';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { useSocket } from '@/context/SocketContext';
@@ -284,16 +285,12 @@ export default function UserDashboard() {
                               <div className="bg-white rounded-xl p-3 sm:p-4 transition-all duration-300 opacity-60 relative">
                                 {/* Blur overlay for entire card */}
                                 <div className="blur-sm pointer-events-none">
-                                  {/* Product Image - Rectangular */}
+                                  {/* Product Image - Rectangular with Carousel */}
                                   <div className="relative h-48 sm:h-56 lg:h-64 mb-4 sm:mb-6 rounded-lg overflow-hidden">
-                                    <Image
-                                      src={item.src}
-                                      alt={item.name}
-                                      fill
-                                      className="object-contain p-3"
-                                      onError={(e) => {
-                                        e.target.src = '/images/polo.png';
-                                      }}
+                                    <ProductImageCarousel
+                                      images={item.src}
+                                      productName={item.name}
+                                      className="h-full w-full"
                                     />
                                   </div>
                                   
@@ -327,20 +324,16 @@ export default function UserDashboard() {
                         className="block group"
                       >
                         <div className="bg-white rounded-xl p-3 sm:p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                          {/* Product Image - Rectangular */}
+                          {/* Product Image - Rectangular with Carousel */}
                           <div className="relative h-48 sm:h-56 lg:h-64 mb-4 sm:mb-6 rounded-lg overflow-hidden">
-                            <Image
-                              src={item.src}
-                              alt={item.name}
-                              fill
-                              className="object-contain p-3"
-                              onError={(e) => {
-                                e.target.src = '/images/polo.png';
-                              }}
+                            <ProductImageCarousel
+                              images={item.src}
+                              productName={item.name}
+                              className="h-full w-full"
                             />
                             {/* Stock Badge - Only show Out of Stock */}
                             {item.stock <= 0 && (
-                              <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                              <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-20">
                                 Out of Stock
                               </div>
                             )}

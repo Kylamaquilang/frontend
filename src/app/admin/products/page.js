@@ -4,6 +4,7 @@ import ProductTable from './product-table';
 import Sidebar from '@/components/common/side-bar';
 import Navbar from '@/components/common/admin-navbar';
 import AddProductModal from './add-product-modal';
+import BulkAddProductModal from './bulk-add-product-modal';
 import API from '@/lib/axios';
 import { useSocket } from '@/context/SocketContext';
 import { useAdminAutoRefresh } from '@/hooks/useAutoRefresh';
@@ -15,6 +16,7 @@ export default function AdminProductPage() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showBulkAddProductModal, setShowBulkAddProductModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Build tabs dynamically from categories
@@ -44,6 +46,14 @@ export default function AdminProductPage() {
 
   const handleCloseAddProductModal = useCallback(() => {
     setShowAddProductModal(false);
+  }, []);
+
+  const handleBulkAddProductSuccess = useCallback(() => {
+    setShowBulkAddProductModal(false);
+  }, []);
+
+  const handleCloseBulkAddProductModal = useCallback(() => {
+    setShowBulkAddProductModal(false);
   }, []);
 
   useEffect(() => {
@@ -148,13 +158,21 @@ export default function AdminProductPage() {
                   </div>
                 </div>
 
-                {/* Add Product Button */}
-                <button 
-                  onClick={() => setShowAddProductModal(true)}
-                  className="w-full sm:w-auto bg-[#000C50] text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium shadow-sm active:scale-95"
-                >
-                  Add Product
-                </button>
+                {/* Add Product Buttons */}
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button 
+                    onClick={() => setShowAddProductModal(true)}
+                    className="flex-1 sm:flex-none bg-[#000C50] text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium shadow-sm active:scale-95"
+                  >
+                    Add Product
+                  </button>
+                  <button 
+                    onClick={() => setShowBulkAddProductModal(true)}
+                    className="flex-1 sm:flex-none bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shadow-sm active:scale-95"
+                  >
+                    Bulk Add
+                  </button>
+                </div>
               </div>
               
               {/* Subcategory Filter */}
@@ -190,6 +208,14 @@ export default function AdminProductPage() {
         <AddProductModal 
           onClose={handleCloseAddProductModal}
           onSuccess={handleAddProductSuccess}
+        />
+      )}
+
+      {/* Bulk Add Product Modal */}
+      {showBulkAddProductModal && (
+        <BulkAddProductModal 
+          onClose={handleCloseBulkAddProductModal}
+          onSuccess={handleBulkAddProductSuccess}
         />
       )}
     </div>

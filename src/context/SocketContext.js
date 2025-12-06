@@ -47,13 +47,6 @@ export function SocketProvider({ children }) {
 
       socketInstance.on('connect_error', (error) => {
         console.error('🔌 Socket.io connection error:', error.message);
-        console.error('🔌 Socket.io error details:', {
-          message: error.message,
-          type: error.type,
-          description: error.description,
-          context: error.context,
-          socketUrl: socketUrl
-        });
         setIsConnected(false);
       });
     }

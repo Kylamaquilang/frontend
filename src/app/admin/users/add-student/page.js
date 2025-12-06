@@ -3,7 +3,6 @@ import Navbar from '@/components/common/admin-navbar';
 import Sidebar from '@/components/common/side-bar';
 import { useState } from 'react';
 import API from '@/lib/axios';
-import Swal from '@/lib/sweetalert-config';
 
 export default function AddStudentPage() {
   const [form, setForm] = useState({ 
@@ -52,54 +51,7 @@ export default function AddStudentPage() {
         window.location.href = '/admin/users';
       }
     } catch (err) {
-      // Handle specific error cases gracefully
-      if (err?.response?.status === 409) {
-        // Duplicate student ID - expected error, show user-friendly message
-        const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Student ID already exists';
-        const existingStudent = err?.response?.data?.existingStudent;
-        
-        await Swal.fire({
-          title: 'Duplicate Entry',
-          html: `<div style="text-align: left;"><p>${errorMessage}</p>${existingStudent ? `<p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Existing student:</strong><br/>• Name: ${existingStudent.name}<br/>• Email: ${existingStudent.email}<br/>• Student ID: ${existingStudent.student_id}</p>` : ''}</div>`,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#000C50'
-        });
-        setError(errorMessage);
-      } else if (err?.response?.status === 400) {
-        // Validation error - expected error, show user-friendly message
-        const errorMessage = err?.response?.data?.error || 'Invalid student data';
-        await Swal.fire({
-          title: 'Validation Error',
-          text: errorMessage,
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#000C50'
-        });
-        setError(errorMessage);
-      } else if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
-        // Timeout error
-        const errorMessage = 'Request timed out. The server may be slow or the student may have already been added. Please check the student list.';
-        await Swal.fire({
-          title: 'Request Timeout',
-          text: errorMessage,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#000C50'
-        });
-        setError(errorMessage);
-      } else {
-        // Unexpected error - show user-friendly message
-        const errorMessage = err?.response?.data?.error || err?.message || 'Failed to add student. Please try again.';
-        await Swal.fire({
-          title: 'Error',
-          text: errorMessage,
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#000C50'
-        });
-        setError(errorMessage);
-      }
+      setError(err?.response?.data?.error || 'Failed to add student');
     } finally {
       setSubmitting(false);
     }
