@@ -11,12 +11,27 @@ const getApiBaseUrl = () => {
     return apiUrl;
   }
   
-  // In production, this should be your actual API URL
+  // In production, try to detect the API URL from the current host
   if (typeof window !== 'undefined') {
-    // Client-side: use the same host but different port
     const host = window.location.hostname;
     const isLocalhost = host === 'localhost' || host === '127.0.0.1';
-    return isLocalhost ? 'http://localhost:5000' : `https://${host}:5000`;
+    
+    if (isLocalhost) {
+      return 'http://localhost:5000';
+    }
+    
+    // In production, try to construct API URL from current host
+    // This assumes the API is on the same domain but different subdomain or path
+    // For Railway, you should set NEXT_PUBLIC_API_URL environment variable
+    const protocol = window.location.protocol;
+    const port = window.location.port;
+    
+    // If NEXT_PUBLIC_API_URL is not set, log a warning
+    console.warn('NEXT_PUBLIC_API_URL not set. Using fallback URL. Please set NEXT_PUBLIC_API_URL in your environment variables.');
+    
+    // Try to use the same host - this is a fallback and may not work
+    // The proper solution is to set NEXT_PUBLIC_API_URL in Railway
+    return `${protocol}//${host}${port ? ':' + port : ''}`;
   }
   return 'http://localhost:5000';
 };

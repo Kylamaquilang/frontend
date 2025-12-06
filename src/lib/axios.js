@@ -2,9 +2,17 @@
 import axios from 'axios';
 
 // Use environment variable for API URL, fallback to localhost for development
-// IMPORTANT: NEXT_PUBLIC_API_URL should be the base URL WITHOUT /api (e.g., http://localhost:5000)
+// IMPORTANT: NEXT_PUBLIC_API_URL should be the base URL WITHOUT /api (e.g., http://localhost:5000 or https://your-backend.railway.app)
 // The /api prefix is added here automatically
 let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+// Warn if NEXT_PUBLIC_API_URL is not set in production
+if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) {
+  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  if (isProduction) {
+    console.error('⚠️ NEXT_PUBLIC_API_URL is not set! Please set this environment variable in Railway to your backend URL (e.g., https://your-backend.railway.app)');
+  }
+}
 
 // Remove trailing slashes and /api if accidentally included
 API_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
