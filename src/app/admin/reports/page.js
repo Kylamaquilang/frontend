@@ -469,34 +469,9 @@ export default function AdminReportsPage() {
             Previous
           </button>
           
-          <div className="flex items-center gap-1">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (pagination.page <= 3) {
-                pageNum = i + 1;
-              } else if (pagination.page >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = pagination.page - 2 + i;
-              }
-              
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => onPageChange(pageNum)}
-                  className={`px-3 py-1 text-sm border rounded-md transition-colors ${
-                    pagination.page === pageNum
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'border-gray-300 hover:bg-gray-100'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
+          <span className="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-md bg-white">
+            Page {pagination.page} of {totalPages}
+          </span>
           
           <button
             onClick={() => onPageChange(pagination.page + 1)}
