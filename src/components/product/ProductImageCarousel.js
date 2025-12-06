@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { ChevronLeftIcon, ChevronRightIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowDownTrayIcon, PrinterIcon } from '@heroicons/react/24/outline';
 
-export default function ProductImageCarousel({ images, productName, className = '', onDownload }) {
+export default function ProductImageCarousel({ images, productName, className = '', onDownload, onPrint }) {
   // If images is a string (single image), convert to array
   const imageArray = Array.isArray(images) ? images : (images ? [images] : []);
   const [currentIndex, setCurrentIndex] = useState(0);
