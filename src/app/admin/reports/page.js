@@ -1538,7 +1538,7 @@ export default function AdminReportsPage() {
             <th>Product Name</th>
             <th>Category</th>
             <th>Size/Variant</th>
-            <th>Base Stock</th>
+            <th>Stock</th>
             <th>Current Stock</th>
             <th>Status</th>
           </tr>
@@ -1549,8 +1549,8 @@ export default function AdminReportsPage() {
               <td style="font-weight: 500;">${item.product_name}</td>
               <td>${item.category_name || 'N/A'}</td>
               <td>${item.size && item.size !== 'No sizes' ? item.size : 'N/A'}</td>
-              <td style="text-align: center; color: #666;">${item.base_stock || 0}</td>
-              <td style="text-align: center; font-weight: 500;">${item.current_stock || 0}</td>
+              <td style="text-align: center; color: #666;">${item.stock || item.ending_stock || 0}</td>
+              <td style="text-align: center; font-weight: 500;">${item.current_stock || item.ending_stock || 0}</td>
               <td>
                 <span class="status-badge ${item.stock_status === 'Out of Stock' ? 'status-out-of-stock' : item.stock_status === 'Low Stock' ? 'status-low-stock' : 'status-good'}">
                   ${item.stock_status}
@@ -1701,8 +1701,8 @@ export default function AdminReportsPage() {
       item.product_name || 'N/A',
       item.category_name || 'N/A',
       item.size && item.size !== 'No sizes' ? item.size : 'N/A',
-      item.base_stock?.toString() || '0',
-      item.current_stock?.toString() || '0',
+      (item.stock || item.ending_stock || 0).toString(),
+      (item.current_stock || item.ending_stock || 0).toString(),
       item.stock_status || 'N/A'
     ]);
 
@@ -1882,8 +1882,8 @@ export default function AdminReportsPage() {
       content += `${index + 1}. ${item.product_name}\n`;
       content += `   Category: ${item.category_name || 'N/A'}\n`;
       content += `   Size/Variant: ${item.size && item.size !== 'No sizes' ? item.size : 'N/A'}\n`;
-      content += `   Base Stock: ${item.base_stock || 0}\n`;
-      content += `   Current Stock: ${item.current_stock || 0}\n`;
+      content += `   Stock: ${item.stock || item.ending_stock || 0}\n`;
+      content += `   Current Stock: ${item.current_stock || item.ending_stock || 0}\n`;
       content += `   Status: ${item.stock_status}\n\n`;
     });
     
