@@ -518,11 +518,11 @@ export default function AddProductModal({ onClose, onSuccess }) {
                         )}
                       </div>
                     ))}
-              </div>
-            </div>
+                  </div>
+                </div>
 
                 {/* Multiple Images Upload Section */}
-              <div>
+                <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">Product Images</label>
                 
                 {/* Existing Images Preview */}
@@ -612,7 +612,6 @@ export default function AddProductModal({ onClose, onSuccess }) {
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Modal Footer */}
